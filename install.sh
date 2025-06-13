@@ -4,7 +4,7 @@
   exit 1
 }
 
-URL="https://raw.githubusercontent.com/oxianet-team/monitor-stats-deamon/refs/heads/main/monitor_daemon.pl"
+URL="https://raw.githubusercontent.com/oxianet-team/monitor-stats/refs/heads/main/monitor_daemon.pl"
 DEST="/usr/local/bin/monitor_daemon.pl"
 
 # Download the script
