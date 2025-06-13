@@ -1,6 +1,6 @@
 #!/bin/sh
 [ "$(id -u)" -ne 0 ] && {
-  echo "This script must be run as root. Use: sudo sh install-monitor.sh"
+  echo "This script must be run as root. Use: sudo sh"
   exit 1
 }
 
