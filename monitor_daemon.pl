@@ -10,6 +10,24 @@ my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
 
+# Fonction pour convertir les unités en MB
+sub convert_to_mb {
+    my ($value) = @_;
+    if ($value =~ /(\d+(\.\d+)?)([KMGTP])/i) {
+        my $number = $1;
+        my $unit = uc($3);
+        my %unit_multiplier = (
+          'K' => 1 / 1024,
+          'M' => 1,
+          'G' => 1024,
+          'T' => 1024 * 1024,
+          'P' => 1024 * 1024 * 1024,
+        );
+        return sprintf("%.2f", $number * $unit_multiplier{$unit});
+    }
+    return $value;
+}
+
 # Analyse simple des arguments
 foreach my $arg (@ARGV) {
     if ($arg =~ /^--api=(.+)$/) {
@@ -144,8 +162,8 @@ eval {
         chomp($line);
         if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)$/) {
             my $filesystem = $1;
-            my $size = $2;
-            my $used = $3;
+            my $size = convert_to_mb($2);
+            my $used = convert_to_mb($3);
             my $mounted_on = $6;
 
             $filesystem =~ s/\\/\\\\/g;
