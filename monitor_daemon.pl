@@ -327,7 +327,7 @@ eval {
         # Envoi des données à l'API en utilisant curl
         console_log("Envoi des données système à $api_url");
 
-        my $curl_cmd = "curl -s -X POST \"$api_url\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $token\" -d \"$json_data\"";
+        my $curl_cmd = "curl -s -v --http1.1 -X POST \"$api_url\" -H \"Content-Type: application/json\" -H \"Authorization: Bearer $token\" -d \"$json_data\"";
         my $response = `$curl_cmd`;
 
         if ($rawOutput) {
