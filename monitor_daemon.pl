@@ -83,10 +83,12 @@ if ($is_daemon_up_to_date == 0) {
     my $crontab_output = `crontab -l`;
     my @lines = split /\n/, $crontab_output;
     @lines = grep { !/monitor_daemon\.pl/ } @lines; # Filtrer les lignes contenant monitor_daemon.pl
-    my $new_crontab = join("\n", @lines);
+    my $new_crontab = @lines ? join("\n", @lines) . "\n" : "";
     open(my $fh, '|-', 'crontab') or die "Impossible d'ouvrir crontab: $!";
     print $fh $new_crontab;
     close($fh);
+
+    sleep(1);
 
     # on récupère le install.sh
     my $url = "https://raw.githubusercontent.com/oxianet-team/monitor-stats-deamon/refs/heads/main/install.sh";
