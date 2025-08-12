@@ -9,6 +9,19 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
+my $VERSION = "1.0.0";
+my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
+
+# Vérification de la version du daemon
+my $remote_url = "https://raw.githubusercontent.com/oxianet-team/monitor-stats-deamon/refs/heads/main/monitor_daemon.pl";
+my $remote_content = `curl -sSL $remote_url`;
+if ($remote_content =~ /\$VERSION\s*=\s*"([^"]+)"/) {
+    my $remote_version = $1;
+    print "Version distante : $remote_version\n" if $debug;
+    $is_daemon_up_to_date = ($remote_version eq $VERSION) ? 1 : 0;
+} else {
+    die "Impossible de récupérer \$VERSION du daemon distant.\n";
+}
 
 # Fonction pour convertir les unités en MB
 sub convert_to_mb {
@@ -54,6 +67,35 @@ foreach my $arg (@ARGV) {
     } else {
         die "Argument inconnu: $arg\n";
     }
+}
+
+if ($is_daemon_up_to_date == 0) {
+    # On récupère l'URL de l'API via le fichier config du git
+    my $api_url_git = "https://raw.githubusercontent.com/oxianet-team/monitor-stats-deamon/refs/heads/main/config";
+    my $config_content = `curl -sSL $api_url_git`;
+    if ($config_content =~ /^API_URL=(.+)$/m) {
+        $api_url = $1;
+    } else {
+        die "Impossible de récupérer API_URL depuis config.txt\n";
+    }
+
+    # On supprime la ligne du crontab déja existante (on regarde la ligne ou il y a monitor_daemon.pl)
+    my $crontab_output = `crontab -l`;
+    my @lines = split /\n/, $crontab_output;
+    @lines = grep { !/monitor_daemon\.pl/ } @lines; # Filtrer les lignes contenant monitor_daemon.pl
+    my $new_crontab = join("\n", @lines);
+    open(my $fh, '|-', 'crontab') or die "Impossible d'ouvrir crontab: $!";
+    print $fh $new_crontab;
+    close($fh);
+
+    # on récupère le install.sh
+    my $url = "https://raw.githubusercontent.com/oxianet-team/monitor-stats-deamon/refs/heads/main/install.sh";
+    my $install_command = "curl -sSL $url | sudo sh -s -- --api=$api_url --uuid=$uuid --token=$token &";
+    if ($debug) {
+        print "Exécution de la commande d'installation: $install_command\n";
+    }
+    `$install_command`; # Exécute la commande d'installation en détaché et arrête le script immédiatement après
+    exit;
 }
 
 # Vérification des paramètres requis
