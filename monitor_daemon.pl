@@ -9,7 +9,7 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
-my $VERSION = "1.0.1";
+my $VERSION = "1.0.2";
 my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
 
 # Vérification de la version du daemon
