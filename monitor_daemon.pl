@@ -9,7 +9,7 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
-my $VERSION = "1.0.0";
+my $VERSION = "1.0.1";
 my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
 
 # Vérification de la version du daemon
@@ -163,10 +163,13 @@ eval {
     my ($cpu_load) = split(/\s+/, $loadavg);
 
     # Récupération du pourcentage d'utilisation CPU
+    my $top_output = '';
+    $top_output = `top -bn1 | grep "Cpu(s)"`;
+
     my $cpu_percent = '';
-    my $top_output = `top -bn1 | grep "Cpu(s)"`;
-    if ($top_output =~ /(\d+\.\d+)\s*id/) {
+    if ($top_output =~ /([\d.,]+)\s*id/i) {
         my $idle = $1;
+        $idle =~ s/,/./;
         $cpu_percent = 100 - $idle;
     }
 
