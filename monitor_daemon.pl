@@ -9,7 +9,7 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
-my $VERSION = "1.0.2";
+my $VERSION = "1.0.3";
 my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
 
 # Vérification de la version du daemon
@@ -143,20 +143,6 @@ eval {
     my $hostname = `hostname`;
     chomp($hostname);
 
-    # Récupération des informations d'utilisation du disque (en excluant les systèmes de fichiers temporaires)
-    my $disk_usage = '';
-    my @df_output = `df -h | grep -v "tmpfs\\|devtmpfs\\|udev"`;
-    my $header_included = 0;
-    foreach my $line (@df_output) {
-        chomp($line);
-        if ($line =~ /sys/i && !$header_included) {
-            $disk_usage .= "$line;";
-            $header_included = 1;
-        } elsif ($line =~ /^\//) {
-            $disk_usage .= "$line;";
-        }
-    }
-
     # Récupération de la charge CPU (moyenne sur 1 minute)
     my $loadavg = `cat /proc/loadavg`;
     chomp($loadavg);
@@ -201,6 +187,8 @@ eval {
         $os_info =~ s/^"//;
         $os_info =~ s/"$//;
     }
+    # Récupération des informations d'utilisation du disque (en excluant les systèmes de fichiers temporaires)
+    my @df_output = `df -h | grep -v "tmpfs\\|devtmpfs\\|udev"`;
 
     # Analyse de l'utilisation du disque en données structurées
     my @disks = ();
