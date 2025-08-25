@@ -9,7 +9,7 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
-my $VERSION = "1.0.3";
+my $VERSION = "1.0.4";
 my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
 
 # Vérification de la version du daemon
@@ -192,7 +192,7 @@ eval {
 
     # Analyse de l'utilisation du disque en données structurées
     my @disks = ();
-    shift @df_output if $header_included;
+    shift @df_output if $df_output[0] =~ /^Filesystem/;
     foreach my $line (@df_output) {
         chomp($line);
         if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)$/) {
