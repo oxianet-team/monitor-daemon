@@ -9,7 +9,7 @@ my $token = '';    # Jeton API
 my $debug = 0;     # Mode débogage
 my $rawOutput = 0;  # Mode sortie brute
 my $jsonOnly = 0;  # Mode affichage JSON uniquement
-my $VERSION = "1.0.5";
+my $VERSION = "1.0.6";
 my $is_daemon_up_to_date = 1; # Indicateur pour vérifier si le démon est à jour
 
 # Vérification de la version du daemon
@@ -24,21 +24,35 @@ if ($remote_content =~ /\$VERSION\s*=\s*"([^"]+)"/) {
 }
 
 # Fonction pour convertir les unités en MB
-sub convert_to_mb {
+sub convert_to_mib {
     my ($value) = @_;
-    if ($value =~ /(\d+(\.\d+)?)([KMGTP])/i) {
-        my $number = $1;
-        my $unit = uc($3);
-        my %unit_multiplier = (
-          'K' => 1 / 1024,
-          'M' => 1,
-          'G' => 1024,
-          'T' => 1024 * 1024,
-          'P' => 1024 * 1024 * 1024,
-        );
-        return sprintf("%.2f", $number * $unit_multiplier{$unit});
+    # Première regex pour capturer le nombre (avec virgule ou point)
+    my $number;
+    if ($value =~ /(\d+[.,]\d+|\d+)/) {
+        $number = $1;
+        $number =~ s/,/./; # normalise la virgule en point
+    } else {
+        return $value;
     }
-    return $value;
+
+    # Deuxième regex pour capturer l'unité
+    my $unit;
+    if ($value =~ /([KMGTP])/i) {
+        $unit = uc($1);
+    } else {
+        return $value;
+    }
+
+    my %unit_multiplier = (
+      'K' => 1 / 1024,
+      'M' => 1,
+      'G' => 1024,
+      'T' => 1024 * 1024,
+      'P' => 1024 * 1024 * 1024,
+    );
+
+    my $result = $number * $unit_multiplier{$unit};
+    return sprintf("%.2f", $result);
 }
 
 # Analyse simple des arguments
@@ -197,8 +211,8 @@ eval {
         chomp($line);
         if ($line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)$/) {
             my $filesystem = $1;
-            my $size = convert_to_mb($2);
-            my $used = convert_to_mb($3);
+            my $size = convert_to_mib($2);
+            my $used = convert_to_mib($3);
             my $mounted_on = $6;
 
             $filesystem =~ s/\\/\\\\/g;
